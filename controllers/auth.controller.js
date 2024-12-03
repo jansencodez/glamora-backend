@@ -1,6 +1,7 @@
 // controllers/authController.js
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const jwt = await import("jsonwebtoken");
+
 const User = require("../models/User");
 const { Cart } = require("../models/Order");
 
