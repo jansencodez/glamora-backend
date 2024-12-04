@@ -55,7 +55,7 @@ export const initializePayment = async (req, res) => {
       {
         email,
         amount: amountInCents,
-        callback_url: "http://localhost:3000/verify-payment", // Adjust as per deployment
+        callback_url: `${process.env.FRONTEND_URL}/verify-payment`, // Adjust as per deployment
       },
       {
         headers: {
