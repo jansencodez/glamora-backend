@@ -1,11 +1,16 @@
-const express = require("express");
+import express from "express";
+import {
+  adminSignup,
+  adminSignin,
+  getAdminData,
+} from "../controllers/admin.controller.js"; // Add .js extension
+import { protect } from "../middleware/authMiddleware.js"; // Add .js extension
+
 const router = express.Router();
-const adminController = require("../controllers/admin.controller");
-const { protect } = require("../middleware/authMiddleware");
 
 // Admin Routes
-router.post("/signup", adminController.adminSignup); // Admin sign-up
-router.post("/signin", adminController.adminSignin); // Admin sign-in
-router.get("/data", protect("admin"), adminController.getAdminData);
+router.post("/signup", adminSignup); // Admin sign-up
+router.post("/signin", adminSignin); // Admin sign-in
+router.get("/data", protect("admin"), getAdminData); // Admin data access
 
-module.exports = router;
+export default router; // Use export instead of module.exports

@@ -1,11 +1,10 @@
 // controllers/authController.js
-const bcrypt = require("bcrypt");
-const jwt = await import("jsonwebtoken");
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import { Cart } from "../models/Order.js";
 
-const User = require("../models/User");
-const { Cart } = require("../models/Order");
-
-exports.signup = async (req, res) => {
+export const signup = async (req, res) => {
   const { name, email, password, confirmPassword, optIn } = req.body;
 
   try {
@@ -73,7 +72,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.signin = async (req, res) => {
+export const signin = async (req, res) => {
   const { email, password } = req.body;
 
   try {

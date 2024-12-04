@@ -1,11 +1,10 @@
-const Product = require("../models/Product");
-const { OrderDetails } = require("../models/Order");
-const nlp = require("compromise");
-const Fuse = require("fuse.js");
-// Assuming you have a Product model for your database
+import Product from "../models/Product.js";
+import { OrderDetails } from "../models/Order.js";
+import nlp from "compromise";
+import Fuse from "fuse.js";
 
 // Main chatbot function to handle user input
-exports.chatBot = async (req, res) => {
+export const chatBot = async (req, res) => {
   try {
     const { input } = req.body;
     const intent = getIntent(input); // Get the intent of the input
@@ -65,7 +64,6 @@ function getIntent(input) {
       "info about",
       "details about",
       "features of",
-      "specifications for",
       "specs of",
       "what's in",
       "how does it work",
@@ -257,195 +255,59 @@ function extractKeywords(input) {
 
 // Function to recommend products based on different criteria
 async function getProductRecommendation(input) {
-  try {
-    // Normalize input and extract keywords
-    const keywords = extractKeywords(input); // Your function for extracting keywords
-    const normalizedInput = input.toLowerCase().trim();
+  const keywords = extractKeywords(input);
+  const fuse = new Fuse(await Product.find(), {
+    keys: ["name", "description"],
+    threshold: 0.3, // Modify to adjust how fuzzy the match can be
+  });
 
-    // Define Fuse.js options
-    const fuseOptions = {
-      shouldSort: true,
-      threshold: 0.3, // Adjust threshold based on your needs
-      keys: ["name", "description"], // Searching within product name and description
-    };
+  const results = fuse.search(keywords.join(" "));
 
-    const fuse = new Fuse(await Product.find(), fuseOptions);
-    const fuseResults = fuse.search(keywords.join(" "));
-
-    // If Fuse.js finds relevant products, use them as base recommendations
-    const filteredFuseProducts = fuseResults
-      .slice(0, 5)
-      .map((result) => result.item);
-
-    // Define a variable to hold final recommendations
-    let recommendedProducts = [];
-
-    // If Fuse.js found matching products, use them
-    if (filteredFuseProducts.length > 0) {
-      recommendedProducts = filteredFuseProducts;
-    } else {
-      // Otherwise, perform a structured recommendation search based on keywords
-
-      if (
-        /recommend|suggest|what would you|what should I buy|what do you suggest|what's the best|can you recommend|what would you choose|ideal product/i.test(
-          normalizedInput
-        )
-      ) {
-        // If no specific filter, show highest-rated products by default
-        recommendedProducts = await Product.find()
-          .sort({ rating: -1 }) // Sort by highest ratings
-          .limit(5);
-      }
-
-      // Handle price-related queries
-      else if (/cheapest|lowest price|affordable/i.test(normalizedInput)) {
-        // Sort by lowest price for budget-friendly options
-        recommendedProducts = await Product.find()
-          .sort({ price: 1 }) // Sort by lowest price
-          .limit(5);
-      } else if (
-        /highest price|most expensive|expensive|premium/i.test(normalizedInput)
-      ) {
-        // Sort by highest price for premium options
-        recommendedProducts = await Product.find()
-          .sort({ price: -1 }) // Sort by highest price
-          .limit(5);
-      }
-
-      // Handle queries asking for best value or popularity
-      else if (/best value|most popular/i.test(normalizedInput)) {
-        recommendedProducts = await Product.find()
-          .sort({ rating: -1, price: 1 }) // Highest rating and lowest price for value
-          .limit(5);
-      }
-
-      // Handle queries for specific types of products (e.g., "product for skin care")
-      else if (/product for/i.test(normalizedInput)) {
-        // Extract the specific category or use case
-        const category = normalizedInput.replace("product for", "").trim();
-        recommendedProducts = await Product.find({
-          description: { $regex: category, $options: "i" },
-        }) // Match by description
-          .limit(5);
-      }
-
-      // Handle queries asking for "best product"
-      else if (/best product/i.test(normalizedInput)) {
-        recommendedProducts = await Product.find()
-          .sort({ rating: -1 }) // Sort by rating to get best products
-          .limit(5);
-      }
-
-      // Default fallback to the top-rated products if no other condition matches
-      else {
-        recommendedProducts = await Product.find()
-          .sort({ rating: -1 }) // Sort by highest rating
-          .limit(5);
-      }
-    }
-
-    // If recommendations are found, format them for the user
-    if (recommendedProducts.length > 0) {
-      const recommendations = recommendedProducts
-        .map(
-          (product) =>
-            `${product.name} - Ksh${Number(product.price).toFixed(2)} (${
-              product.rating
-            } stars)\n`
-        )
-        .join("\n");
-
-      return `Here are some recommended products based on your query:\n${recommendations}`;
-    } else {
-      return "I couldn't find products matching your preferences. Could you clarify or provide more details?";
-    }
-  } catch (error) {
-    console.log(error);
-    return "There was an error fetching product recommendations. Please try again later.";
+  if (results.length) {
+    return `Here are some products you might like: ${results
+      .slice(0, 3)
+      .map((result) => result.item.name)
+      .join(", ")} 😍`;
+  } else {
+    return "I couldn't find any matching products. Please try another search. 🙇‍♂️";
   }
 }
 
-async function getCategoryInfo(input) {
-  const categoryMap = {
-    skincare:
-      "Our skincare products are designed to give you glowing and healthy skin.",
-    makeup: "Explore our range of makeup products for a flawless look.",
-    haircare:
-      "Find haircare products that nourish and style your hair perfectly.",
-    fragrance: "Discover our collection of enchanting fragrances.",
-    "bath & body": "Relax and rejuvenate with our bath & body essentials.",
-    "nail care":
-      "Keep your nails stylish and healthy with our nail care range.",
-    "tools & brushes":
-      "Professional tools and brushes to elevate your beauty routine.",
-    "men's grooming": "Premium grooming products tailored for men.",
-  };
-
-  for (const category in categoryMap) {
-    if (input.toLowerCase().includes(category)) {
-      // Retrieve the top-rated products for the category
-      const products = await Product.find({
-        category: { $regex: new RegExp(`^${category}$`, "i") }, // Case-insensitive regex
-      })
-        .sort({ rating: -1 }) // Sort by highest rating
-        .limit(10); // Limit to top 10 products
-
-      if (products.length > 0) {
-        const productList = products
-          .map(
-            (product) =>
-              `${product.name} - ${product.price} (${product.rating} stars)`
-          )
-          .join("\n");
-
-        return `${categoryMap[category]}\n\nHere are some of our top-rated products:\n${productList}`;
-      } else {
-        return `${categoryMap[category]}\n\nUnfortunately, we don't have products in this category at the moment.`;
-      }
-    }
-  }
-
-  return "I couldn't recognize the category. Please try again!";
-}
-// Function to fetch the order status (this can be enhanced as needed)
+// Function to retrieve order status
 async function getOrderStatus(input) {
-  // Match a UUID pattern (e.g., e345cd64-1537-465a-a171-277bee7856cf)
-  const orderId = input.match(/([a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12})/i);
-
-  if (!orderId) {
-    return "I couldn't find any order details. Please provide your order ID in the correct format.";
-  }
-
-  // Find the order by orderId
-  const order = await OrderDetails.findOne({ orderId: orderId[0] }).populate(
-    "user",
-    "name"
-  ); // Populating user name
+  const orderId = extractOrderId(input);
+  const order = await OrderDetails.findById(orderId);
 
   if (order) {
-    // Prepare order details to return
-    const numberOfItems = order.items.length;
-    const totalPrice = order.totalPrice.toFixed(2); // Format price to two decimal places
-    const finalPrice = order.finalPrice.toFixed(2); // Format final price
-    const status = order.status;
-    const paymentStatus = order.payment ? order.payment.status : "N/A";
-    const shippingDetails = order.shipping
-      ? `${order.shipping.fullName}, ${order.shipping.city}, ${order.shipping.country}`
-      : "Shipping details not available";
-
-    return `Your order with ID ${orderId[0]} is currently being processed. 
-            Number of items: ${numberOfItems}. 
-            Total Price: $${totalPrice}. 
-            Final Price (after discounts): $${finalPrice}. 
-            Order Status: ${status}. 
-            Payment Status: ${paymentStatus}. 
-            Shipping: ${shippingDetails}.`;
+    return `Your order #${orderId} is currently ${order.status}. You can expect it to arrive in ${order.deliveryTime} days.`;
+  } else {
+    return `I couldn’t find an order with the ID #${orderId}. Please double-check and try again. 😅`;
   }
-
-  return "No order found with the given ID.";
 }
 
-// Function to handle general queries
-async function getGeneralResponse() {
-  return "I’m not sure what you mean. Let me know how I can assist you better. Maybe you want to check out products, track orders, or browse categories? 🤔";
+// Helper function to extract order ID
+function extractOrderId(input) {
+  const match = input.match(/order\s*(\d+)/);
+  return match ? match[1] : null;
+}
+
+// Function to retrieve category information
+async function getCategoryInfo(input) {
+  const category = input.toLowerCase();
+  const productsInCategory = await Product.find({
+    category: { $regex: category, $options: "i" },
+  });
+
+  if (productsInCategory.length) {
+    return `We have several amazing products in the ${category} category: ${productsInCategory
+      .map((product) => product.name)
+      .join(", ")}`;
+  } else {
+    return `Sorry, there are no products in the "${category}" category at the moment. Please check back later. 🙇‍♂️`;
+  }
+}
+
+// Function for a general response if no intent is found
+function getGeneralResponse() {
+  return "I’m sorry, I didn’t quite catch that. Could you please rephrase or ask something else? 🙇‍♂️";
 }

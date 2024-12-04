@@ -1,14 +1,11 @@
-// Verify Payment Function
-const axios = require("axios");
-const { v4: uuidv4 } = require("uuid");
-const { OrderDetails, Cart } = require("../models/Order");
-const Product = require("../models/Product");
-// Get Order by ID Controller
-const mongoose = require("mongoose");
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
+import { OrderDetails, Cart } from "../models/Order.js";
 
 // Paystack secret key
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-exports.initializePayment = async (req, res) => {
+
+export const initializePayment = async (req, res) => {
   const {
     email,
     amount,
@@ -121,7 +118,7 @@ exports.initializePayment = async (req, res) => {
 };
 
 // Verify Payment Function
-exports.verifyPayment = async (req, res) => {
+export const verifyPayment = async (req, res) => {
   const { reference, orderId } = req.body;
 
   try {

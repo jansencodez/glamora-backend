@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 // Define the CartItem schema (includes reference to the Product)
 const CartItemSchema = new mongoose.Schema({
@@ -60,7 +60,6 @@ const OrderDetailsSchema = new mongoose.Schema(
       required: true,
     },
   },
-
   { timestamps: true } // Timestamps automatically handle createdAt and updatedAt
 );
 
@@ -71,13 +70,9 @@ const CartSchema = new mongoose.Schema({
 
 // Create the models
 const Cart = mongoose.models.Cart || mongoose.model("Cart", CartSchema);
-
 const OrderDetails =
   mongoose.models.OrderDetails ||
   mongoose.model("OrderDetails", OrderDetailsSchema);
 
 // Export the models
-module.exports = {
-  Cart,
-  OrderDetails,
-};
+export { Cart, OrderDetails };

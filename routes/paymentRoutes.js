@@ -1,9 +1,9 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   verifyPayment,
   initializePayment,
-} = require("../controllers/payment.controller");
-const { protect } = require("../middleware/authMiddleware");
+} from "../controllers/payment.controller.js"; // Add .js extension
+import { protect } from "../middleware/authMiddleware.js"; // Add .js extension
 
 const router = express.Router();
 
@@ -11,4 +11,4 @@ const router = express.Router();
 router.post("/verify-payment", protect("customer"), verifyPayment);
 router.post("/initialize-payment", protect("customer"), initializePayment);
 
-module.exports = router;
+export default router; // Use export instead of module.exports

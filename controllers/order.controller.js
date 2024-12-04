@@ -1,10 +1,10 @@
-const { OrderDetails, Cart } = require("../models/Order");
-const Product = require("../models/Product");
-// Get Order by ID Controller
-const mongoose = require("mongoose");
+import { v4 as uuidv4 } from "uuid";
+import { OrderDetails, Cart } from "../models/Order.js";
+import Product from "../models/Product.js";
+import mongoose from "mongoose";
 
-const { v4: uuidv4 } = require("uuid");
-exports.createOrder = async (req, res) => {
+// Create Order Controller
+export const createOrder = async (req, res) => {
   const {
     shippingAddress,
     paymentMethod,
@@ -93,7 +93,8 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-exports.getOrderById = async (req, res) => {
+// Get Order by ID Controller
+export const getOrderById = async (req, res) => {
   const { orderId } = req.params;
 
   try {
@@ -132,7 +133,7 @@ exports.getOrderById = async (req, res) => {
 };
 
 // Update Order Status Controller
-exports.updateOrderStatus = async (req, res) => {
+export const updateOrderStatus = async (req, res) => {
   const { orderId } = req.params;
   const { status } = req.body;
 
@@ -159,7 +160,7 @@ exports.updateOrderStatus = async (req, res) => {
 };
 
 // Get All Orders Controller (Admin functionality)
-exports.getAllOrders = async (req, res) => {
+export const getAllOrders = async (req, res) => {
   try {
     // Fetch all orders and populate the product details, including imageUrls
     const orders = await OrderDetails.find()

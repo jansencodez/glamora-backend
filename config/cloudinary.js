@@ -1,5 +1,5 @@
-const cloudinary = require("cloudinary").v2;
-const streamifier = require("streamifier");
+import cloudinary from "cloudinary";
+import streamifier from "streamifier";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -18,7 +18,7 @@ const uploadToCloudinary = (buffer, folder) => {
     };
 
     // Upload the image with Cloudinary's auto-generated signature
-    const stream = cloudinary.uploader.upload_stream(
+    const stream = cloudinary.v2.uploader.upload_stream(
       upload_params,
       (error, result) => {
         if (error) return reject(error);
@@ -30,4 +30,4 @@ const uploadToCloudinary = (buffer, folder) => {
   });
 };
 
-module.exports = { uploadToCloudinary };
+export { uploadToCloudinary };

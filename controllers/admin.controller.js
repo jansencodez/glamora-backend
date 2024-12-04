@@ -1,9 +1,9 @@
-const bcrypt = require("bcrypt");
-const jwt = await import("jsonwebtoken");
-const User = require("../models/User");
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js"; // Note the '.js' extension for ES Modules
 
 // Admin Sign-Up
-exports.adminSignup = async (req, res) => {
+export const adminSignup = async (req, res) => {
   const { name, email, password, confirmPassword, optIn } = req.body;
 
   try {
@@ -59,7 +59,7 @@ exports.adminSignup = async (req, res) => {
 };
 
 // Admin Sign-In
-exports.adminSignin = async (req, res) => {
+export const adminSignin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -101,6 +101,7 @@ exports.adminSignin = async (req, res) => {
     return res.status(500).json({ message: "Server error." });
   }
 };
+
 // Mock Admin data (replace with real database queries if needed)
 const mockAdminData = {
   totalUsers: 120,
@@ -110,7 +111,7 @@ const mockAdminData = {
 };
 
 // Controller function to send admin data
-exports.getAdminData = (req, res) => {
+export const getAdminData = (req, res) => {
   try {
     // You can use the req.user object to access the decoded token (e.g., user role)
     return res.status(200).json(mockAdminData); // Send the admin data

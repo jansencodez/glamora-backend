@@ -1,4 +1,4 @@
-const tf = require("@tensorflow/tfjs");
+import * as tf from "@tensorflow/tfjs";
 
 // Define the model architecture
 const model = tf.sequential();
@@ -108,8 +108,7 @@ const trainingData = [
   { input: "need help with", category: "general_query" },
   { input: "where can I find", category: "general_query" },
 
-  //category info
-
+  // Category info
   { input: "tell me about", category: "category_info" },
   { input: "info about", category: "category_info" },
   { input: "details about", category: "category_info" },
@@ -124,7 +123,7 @@ const trainingData = [
 ];
 
 // Train the model
-async function trainModel() {
+export async function trainModel() {
   const inputs = trainingData.map((data) => data.input);
   const labels = trainingData.map((data) => categories.indexOf(data.category));
 
@@ -139,11 +138,9 @@ async function trainModel() {
 }
 
 // Use the model to classify user input
-async function classifyInput(input) {
+export async function classifyInput(input) {
   const inputTensor = tf.tensor2d([input], [1, 1]);
   const output = await model.predict(inputTensor);
   const categoryIndex = output.argMax(1).dataSync()[0];
   return categories[categoryIndex];
 }
-
-module.exports = { trainModel, classifyInput };

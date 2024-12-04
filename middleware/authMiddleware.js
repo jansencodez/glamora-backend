@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+
 export const protect = (roles = []) => {
   return (req, res, next) => {
     // Get the Authorization header

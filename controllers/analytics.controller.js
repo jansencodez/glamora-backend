@@ -1,6 +1,7 @@
-const { OrderDetails } = require("../models/Order");
+// controllers/analyticsController.js
+import { OrderDetails } from "../models/Order.js";
 
-const getAnalytics = async (req, res) => {
+export const getAnalytics = async (req, res) => {
   try {
     const topLimit = parseInt(req.query.top || "5");
 
@@ -111,8 +112,4 @@ const getAnalytics = async (req, res) => {
     console.error("Error fetching analytics data:", error.message);
     res.status(500).json({ error: "Failed to fetch analytics data" });
   }
-};
-
-module.exports = {
-  getAnalytics,
 };

@@ -1,18 +1,21 @@
-const express = require("express");
-require("dotenv").config(); // Fix: Correct import for dotenv
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const connectDB = require("./config/database");
-const productRoutes = require("./routes/products");
-const cartRoutes = require("./routes/cartRoutes");
-const orderRoutes = require("./routes/orderRoutes");
-const authRoutes = require("./routes/authRoutes");
-const adminRoutes = require("./routes/adminRoutes");
-const usersRoutes = require("./routes/usersRoutes");
-const chatRoutes = require("./routes/chatbotRoutes");
-const paymentRoutes = require("./routes/paymentRoutes");
-const analyticsRoutes = require("./routes/analyticsRoutes");
-const reviewRoutes = require("./routes/reviewsRoutes");
+import express from "express";
+import dotenv from "dotenv"; // Correct import for dotenv
+import cors from "cors";
+import bodyParser from "body-parser";
+import connectDB from "./config/database.js"; // Add .js extension for local files
+import productRoutes from "./routes/products.js"; // Add .js extension
+import cartRoutes from "./routes/cartRoutes.js"; // Add .js extension
+import orderRoutes from "./routes/orderRoutes.js"; // Add .js extension
+import authRoutes from "./routes/authRoutes.js"; // Add .js extension
+import adminRoutes from "./routes/adminRoutes.js"; // Add .js extension
+import usersRoutes from "./routes/usersRoutes.js"; // Add .js extension
+import chatRoutes from "./routes/chatbotRoutes.js"; // Add .js extension
+import paymentRoutes from "./routes/paymentRoutes.js"; // Add .js extension
+import analyticsRoutes from "./routes/analyticsRoutes.js"; // Add .js extension
+import reviewRoutes from "./routes/reviewsRoutes.js"; // Add .js extension
+
+// Initialize dotenv
+dotenv.config();
 
 // Connect to the database
 connectDB();
@@ -25,7 +28,7 @@ app.use(cors());
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
 
-// routes
+// Routes
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);

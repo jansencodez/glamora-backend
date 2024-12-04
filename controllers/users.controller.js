@@ -1,7 +1,7 @@
-const User = require("../models/User"); // Assuming User model is in this path
+import User from "../models/User.js"; // Assuming User model is in this path
 
 // Controller to get all users
-const getAllUsers = async (req, res) => {
+export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().populate("orders"); // Populate order details (if necessary)
     res.status(200).json(users);
@@ -12,7 +12,7 @@ const getAllUsers = async (req, res) => {
 };
 
 // Controller to get a single user by ID
-const getUserById = async (req, res) => {
+export const getUserById = async (req, res) => {
   const { userId } = req.user;
   try {
     const user = await User.findById(userId).populate("orders"); // Populate order details
@@ -25,5 +25,3 @@ const getUserById = async (req, res) => {
     res.status(500).json({ message: "Failed to retrieve the user." });
   }
 };
-
-module.exports = { getAllUsers, getUserById };

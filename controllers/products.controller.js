@@ -1,11 +1,10 @@
-const Product = require("../models/Product");
-const { uploadToCloudinary } = require("../config/cloudinary");
-const mongoose = require("mongoose");
-const handleError = require("../utils/handleError");
-const cloudinary = require("../config/cloudinary");
-const uploader = cloudinary.uploader;
+import Product from "../models/Product.js";
+import { uploadToCloudinary } from "../config/cloudinary.js";
+import mongoose from "mongoose";
+import handleError from "../utils/handleError.js";
+
 // Get all products with pagination and price conversion
-exports.getAllProducts = async (req, res) => {
+export const getAllProducts = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   try {
     const products = await Product.find()
@@ -34,7 +33,7 @@ exports.getAllProducts = async (req, res) => {
 };
 
 // Get a single product by ID
-exports.getProductById = async (req, res) => {
+export const getProductById = async (req, res) => {
   const { id } = req.params;
   try {
     const product = await Product.findById(id);
@@ -55,7 +54,7 @@ exports.getProductById = async (req, res) => {
 };
 
 // Create a new product
-exports.createProduct = async (req, res) => {
+export const createProduct = async (req, res) => {
   const { name, price, description, category, rating } = req.body;
 
   // Validate required fields
@@ -116,7 +115,7 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-exports.bulkUploadProducts = async (req, res) => {
+export const bulkUploadProducts = async (req, res) => {
   try {
     // Parse the products JSON string and retrieve uploaded images
     const products = JSON.parse(req.body.products);
@@ -187,7 +186,7 @@ exports.bulkUploadProducts = async (req, res) => {
 };
 
 // Update an existing product
-exports.updateProduct = async (req, res) => {
+export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const updates = req.body;
 
@@ -213,7 +212,7 @@ exports.updateProduct = async (req, res) => {
 };
 
 // Delete a product
-exports.deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
     const product = await Product.findByIdAndDelete(id);

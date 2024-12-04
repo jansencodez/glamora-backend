@@ -1,7 +1,7 @@
-const Review = require("../models/Review");
-const mongoose = require("mongoose");
+import Review from "../models/Review.js";
+import mongoose from "mongoose";
 
-exports.getReviews = async (req, res) => {
+export const getReviews = async (req, res) => {
   const { productId } = req.params;
   console.log(productId);
 
@@ -31,7 +31,7 @@ exports.getReviews = async (req, res) => {
   }
 };
 
-exports.addReview = async (req, res) => {
+export const addReview = async (req, res) => {
   const { productId, rating, text } = req.body;
   const { userId } = req.user; // Assuming you're using authentication
 
@@ -50,7 +50,7 @@ exports.addReview = async (req, res) => {
   }
 };
 
-exports.deleteReview = async (req, res) => {
+export const deleteReview = async (req, res) => {
   const { reviewId } = req.params;
   try {
     const deletedReview = await Review.findByIdAndDelete(reviewId);
@@ -64,7 +64,7 @@ exports.deleteReview = async (req, res) => {
   }
 };
 
-exports.updateReview = async (req, res) => {
+export const updateReview = async (req, res) => {
   const { reviewId } = req.params;
   const { rating, text } = req.body;
 

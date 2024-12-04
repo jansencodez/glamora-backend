@@ -1,7 +1,7 @@
-const express = require("express");
-const cartController = require("../controllers/cart.controller");
-const { protect } = require("../middleware/authMiddleware");
-const { ensureCartExists } = require("../middleware/createCart");
+import express from "express";
+import * as cartController from "../controllers/cart.controller.js";
+import { protect } from "../middleware/authMiddleware.js";
+import { ensureCartExists } from "../middleware/createCart.js";
 
 const router = express.Router();
 
@@ -35,4 +35,4 @@ router.get(
   cartController.getCart // Get all items in the cart
 );
 
-module.exports = router;
+export default router; // Use export default instead of module.exports

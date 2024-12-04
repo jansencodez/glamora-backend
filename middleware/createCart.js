@@ -1,6 +1,6 @@
-const { Cart } = require("../models/Order");
+import { Cart } from "../models/Order.js";
 
-exports.ensureCartExists = async (req, res, next) => {
+export const ensureCartExists = async (req, res, next) => {
   try {
     const { userId } = req.user;
     if (!userId) {

@@ -1,4 +1,4 @@
-module.exports = (res, error, message = "Something went wrong") => {
+export default (res, error, message = "Something went wrong") => {
   console.error(error); // Log the error for server-side debugging
   res.status(500).json({
     success: false,

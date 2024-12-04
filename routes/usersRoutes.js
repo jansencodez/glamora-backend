@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+import { getAllUsers, getUserById } from "../controllers/users.controller.js"; // Add .js extension
+import { protect } from "../middleware/authMiddleware.js"; // Add .js extension
+
 const router = express.Router();
-const { getAllUsers, getUserById } = require("../controllers/users.controller"); // Adjust path as needed
-const { protect } = require("../middleware/authMiddleware");
 
 // Route to get all users
 router.get("/", getAllUsers);
@@ -9,4 +10,4 @@ router.get("/", getAllUsers);
 // Route to get a user by ID
 router.get("/profile", protect("customer"), getUserById);
 
-module.exports = router;
+export default router; // Use export instead of module.exports

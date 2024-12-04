@@ -1,5 +1,5 @@
-const multer = require("multer");
-const path = require("path");
+import multer from "multer";
+import path from "path";
 
 // Set up multer for multiple file upload handling
 const upload = multer({
@@ -13,4 +13,4 @@ const upload = multer({
   },
 }).array("images", 100);
 
-module.exports = upload;
+export default upload; // Use export instead of module.exports
