@@ -255,21 +255,111 @@ function extractKeywords(input) {
 
 // Function to recommend products based on different criteria
 async function getProductRecommendation(input) {
-  const keywords = extractKeywords(input);
-  const fuse = new Fuse(await Product.find(), {
-    keys: ["name", "description"],
-    threshold: 0.3, // Modify to adjust how fuzzy the match can be
-  });
+  try {
+    // Normalize input and extract keywords
+    const keywords = extractKeywords(input); // Your function for extracting keywords
+    const normalizedInput = input.toLowerCase().trim();
 
-  const results = fuse.search(keywords.join(" "));
+    // Define Fuse.js options
+    const fuseOptions = {
+      shouldSort: true,
+      threshold: 0.3, // Adjust threshold based on your needs
+      keys: ["name", "description"], // Searching within product name and description
+    };
 
-  if (results.length) {
-    return `Here are some products you might like: ${results
-      .slice(0, 3)
-      .map((result) => result.item.name)
-      .join(", ")} 😍`;
-  } else {
-    return "I couldn't find any matching products. Please try another search. 🙇‍♂️";
+    const fuse = new Fuse(await Product.find(), fuseOptions);
+    const fuseResults = fuse.search(keywords.join(" "));
+
+    // If Fuse.js finds relevant products, use them as base recommendations
+    const filteredFuseProducts = fuseResults
+      .slice(0, 5)
+      .map((result) => result.item);
+
+    // Define a variable to hold final recommendations
+    let recommendedProducts = [];
+
+    // If Fuse.js found matching products, use them
+    if (filteredFuseProducts.length > 0) {
+      recommendedProducts = filteredFuseProducts;
+    } else {
+      // Otherwise, perform a structured recommendation search based on keywords
+
+      if (
+        /recommend|suggest|what would you|what should I buy|what do you suggest|what's the best|can you recommend|what would you choose|ideal product/i.test(
+          normalizedInput
+        )
+      ) {
+        // If no specific filter, show highest-rated products by default
+        recommendedProducts = await Product.find()
+          .sort({ rating: -1 }) // Sort by highest ratings
+          .limit(5);
+      }
+
+      // Handle price-related queries
+      else if (/cheapest|lowest price|affordable/i.test(normalizedInput)) {
+        // Sort by lowest price for budget-friendly options
+        recommendedProducts = await Product.find()
+          .sort({ price: 1 }) // Sort by lowest price
+          .limit(5);
+      } else if (
+        /highest price|most expensive|expensive|premium/i.test(normalizedInput)
+      ) {
+        // Sort by highest price for premium options
+        recommendedProducts = await Product.find()
+          .sort({ price: -1 }) // Sort by highest price
+          .limit(5);
+      }
+
+      // Handle queries asking for best value or popularity
+      else if (/best value|most popular/i.test(normalizedInput)) {
+        recommendedProducts = await Product.find()
+          .sort({ rating: -1, price: 1 }) // Highest rating and lowest price for value
+          .limit(5);
+      }
+
+      // Handle queries for specific types of products (e.g., "product for skin care")
+      else if (/product for/i.test(normalizedInput)) {
+        // Extract the specific category or use case
+        const category = normalizedInput.replace("product for", "").trim();
+        recommendedProducts = await Product.find({
+          description: { $regex: category, $options: "i" },
+        }) // Match by description
+          .limit(5);
+      }
+
+      // Handle queries asking for "best product"
+      else if (/best product/i.test(normalizedInput)) {
+        recommendedProducts = await Product.find()
+          .sort({ rating: -1 }) // Sort by rating to get best products
+          .limit(5);
+      }
+
+      // Default fallback to the top-rated products if no other condition matches
+      else {
+        recommendedProducts = await Product.find()
+          .sort({ rating: -1 }) // Sort by highest rating
+          .limit(5);
+      }
+    }
+
+    // If recommendations are found, format them for the user
+    if (recommendedProducts.length > 0) {
+      const recommendations = recommendedProducts
+        .map(
+          (product) =>
+            `${product.name} - Ksh${Number(product.price).toFixed(2)} (${
+              product.rating
+            } stars)\n`
+        )
+        .join("\n");
+
+      return `Here are some recommended products based on your query:\n${recommendations}`;
+    } else {
+      return "I couldn't find products matching your preferences. Could you clarify or provide more details?";
+    }
+  } catch (error) {
+    console.log(error);
+    return "There was an error fetching product recommendations. Please try again later.";
   }
 }
 
@@ -308,6 +398,6 @@ async function getCategoryInfo(input) {
 }
 
 // Function for a general response if no intent is found
-function getGeneralResponse() {
-  return "I’m sorry, I didn’t quite catch that. Could you please rephrase or ask something else? 🙇‍♂️";
+async function getGeneralResponse() {
+  return "I’m not sure what you mean. Let me know how I can assist you better. Maybe you want to check out products, track orders, or browse categories? 🤔";
 }
