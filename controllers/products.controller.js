@@ -1,7 +1,8 @@
 import Product from "../models/Product.js";
-import { uploadToCloudinary } from "../config/cloudinary.js";
-import mongoose from "mongoose";
 import handleError from "../utils/handleError.js";
+import cloudinary from "../config/cloudinaryConfig.js";
+// Use the uploader
+const uploader = cloudinary.uploader;
 
 // Get all products with pagination and price conversion
 export const getAllProducts = async (req, res) => {
@@ -50,68 +51,6 @@ export const getProductById = async (req, res) => {
     res.status(200).json({ success: true, product: productWithPrice });
   } catch (error) {
     handleError(res, error, "Error fetching product");
-  }
-};
-
-// Create a new product
-export const createProduct = async (req, res) => {
-  const { name, price, description, category, rating } = req.body;
-
-  // Validate required fields
-  if (!name || !price || !description || !category || rating === undefined) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Missing required fields" });
-  }
-
-  // Parse price and rating to ensure they are correct types
-  const parsedPrice = parseFloat(price);
-  const parsedRating = parseInt(rating, 10);
-
-  if (isNaN(parsedPrice) || isNaN(parsedRating)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid price or rating value" });
-  }
-
-  // Check if files were uploaded and are valid image formats
-  if (!req.files || req.files.length === 0) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No images uploaded" });
-  }
-
-  try {
-    // Handle image upload to Cloudinary
-    const folder = `glamora_products/${category || "uncategorized"}`;
-    const imageUploadPromises = req.files.map((file) =>
-      uploadToCloudinary(file.buffer, folder)
-    );
-
-    const uploadedImages = await Promise.all(imageUploadPromises);
-    const imageUrls = uploadedImages.map((result) => result.secure_url);
-
-    // Create the product with image URLs and other details
-    const newProduct = new Product({
-      name,
-      price: new mongoose.Types.Decimal128(parsedPrice.toString()), // Save as Decimal128 for price
-      description,
-      category,
-      discount: 0,
-      rating: parsedRating,
-      imageUrls, // Store the Cloudinary image URLs
-    });
-
-    // Save product to the database
-    await newProduct.save();
-    res.status(201).json({ success: true, product: newProduct });
-  } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error creating product",
-      error: error.message,
-    });
   }
 };
 

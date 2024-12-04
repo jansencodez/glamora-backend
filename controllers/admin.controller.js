@@ -1,6 +1,8 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js"; // Note the '.js' extension for ES Modules
+import { OrderDetails } from "../models/Order.js";
+import Product from "../models/Product.js";
 
 // Admin Sign-Up
 export const adminSignup = async (req, res) => {
@@ -102,19 +104,55 @@ export const adminSignin = async (req, res) => {
   }
 };
 
-// Mock Admin data (replace with real database queries if needed)
-const mockAdminData = {
-  totalUsers: 120,
-  totalOrders: 350,
-  totalProducts: 75,
-  totalRevenue: 5000,
-};
-
-// Controller function to send admin data
-export const getAdminData = (req, res) => {
+export const getAdminData = async (req, res) => {
   try {
-    // You can use the req.user object to access the decoded token (e.g., user role)
-    return res.status(200).json(mockAdminData); // Send the admin data
+    // Get total number of users
+    const totalUsers = await User.countDocuments();
+
+    // Get total number of orders
+    const totalOrders = await OrderDetails.countDocuments();
+
+    // Get total number of products
+    const totalProducts = await Product.countDocuments();
+
+    // Calculate total revenue from orders (assuming the total amount is stored in the `amount` field of the Order model)
+    const salesOverview = await OrderDetails.aggregate([
+      {
+        $match: { status: { $in: ["delivered", "pending delivery"] } }, // Match both delivered and pending delivery orders
+      },
+      {
+        $group: {
+          _id: "$status", // Group by status (delivered or pending delivery)
+          total: { $sum: { $toDouble: "$finalPrice" } },
+        },
+      },
+    ]);
+
+    const salesData = {
+      totalSales: 0,
+      pendingDeliverySales: 0,
+      deliveredSales: 0,
+    };
+
+    // Calculate totals for each status (pending delivery, delivered)
+    salesOverview.forEach((item) => {
+      if (item._id === "pending delivery") {
+        salesData.pendingDeliverySales = item.total;
+      } else if (item._id === "delivered") {
+        salesData.deliveredSales = item.total;
+      }
+    });
+
+    salesData.totalSales =
+      salesData.pendingDeliverySales + salesData.deliveredSales;
+
+    // Send the actual data as response
+    return res.status(200).json({
+      totalUsers,
+      totalOrders,
+      totalProducts,
+      totalRevenue: salesData.totalSales,
+    });
   } catch (error) {
     return res
       .status(500)
