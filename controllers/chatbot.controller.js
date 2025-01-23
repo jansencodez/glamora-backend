@@ -179,6 +179,7 @@ async function getProductInfo(input) {
   }
 }
 
+// Enhanced Product Recommendation Handler
 async function getProductRecommendations(sessionId, input) {
   try {
     const context = getContext(sessionId);
@@ -207,7 +208,7 @@ async function getProductRecommendations(sessionId, input) {
         console.log("Cache hit: Affordable products retrieved from cache.");
       }
     }
-    // Then, check for expensive/premium
+    // Then, check for premium products
     else if (/expensive|premium|high-end|luxury/i.test(input)) {
       recommendations = cache.get("expensive_products");
       if (!recommendations) {
@@ -219,7 +220,7 @@ async function getProductRecommendations(sessionId, input) {
         console.log("Cache hit: Expensive products retrieved from cache.");
       }
     }
-    // Finally, check for top-rated products
+    // Default to top-rated products if no specific category is mentioned
     else {
       recommendations = cache.get("top_products");
       if (!recommendations) {

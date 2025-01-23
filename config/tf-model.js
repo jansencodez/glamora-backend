@@ -1,11 +1,11 @@
-import * as tf from "@tensorflow/tfjs";
+import * as tf from "@tensorflow/tfjs-node";
 
 // Define the model architecture
 const model = tf.sequential();
 model.add(
   tf.layers.embedding({
     inputShape: [1],
-    outputDim: 10, // Set outputDim to a positive integer
+    outputDim: 10, // Correct property name is outputDim
     inputDim: 1000,
   })
 );
@@ -138,9 +138,11 @@ export async function trainModel() {
 }
 
 // Use the model to classify user input
-export async function classifyInput(input) {
+async function classifyInput(input) {
   const inputTensor = tf.tensor2d([input], [1, 1]);
   const output = await model.predict(inputTensor);
   const categoryIndex = output.argMax(1).dataSync()[0];
   return categories[categoryIndex];
 }
+
+classifyInput("hello");

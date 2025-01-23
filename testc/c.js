@@ -1,4 +1,4 @@
-const nlp = require("compromise");
+import nlp from "compromise";
 
 function getIntent(input) {
   // Convert input to lowercase and process with compromise

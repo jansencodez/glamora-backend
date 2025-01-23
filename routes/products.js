@@ -3,6 +3,7 @@ import * as productsController from "../controllers/products.controller.js";
 import { protect } from "../middleware/authMiddleware.js";
 import multer from "multer";
 import * as singleUpload from "../controllers/singleUpload.controller.js";
+import * as deleteSingleProduct from "../controllers/deleteProduct.controller.js";
 
 // Set up multer storage for Cloudinary (in-memory storage)
 const storage = multer.memoryStorage();
@@ -20,7 +21,7 @@ router.get("/:id", productsController.getProductById);
 router.put("/:id", productsController.updateProduct);
 
 // Route to delete a product
-router.delete("/:id", productsController.deleteProduct);
+router.delete("/:id", deleteSingleProduct.deleteProduct);
 
 // Route for product upload
 router.post(

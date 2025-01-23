@@ -1,8 +1,5 @@
 import Product from "../models/Product.js";
 import handleError from "../utils/handleError.js";
-import cloudinary from "../config/cloudinaryConfig.js";
-// Use the uploader
-const uploader = cloudinary.uploader;
 
 // Get all products with pagination and price conversion
 export const getAllProducts = async (req, res) => {
@@ -147,29 +144,5 @@ export const updateProduct = async (req, res) => {
       message: "Error updating product",
       error: error.message,
     });
-  }
-};
-
-// Delete a product
-export const deleteProduct = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const product = await Product.findByIdAndDelete(id);
-    if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
-    }
-
-    const imageDeletionPromises = product.imageUrls.map((url) =>
-      uploader.destroy(url.split("/").pop().split(".")[0])
-    );
-    await Promise.all(imageDeletionPromises);
-
-    res
-      .status(200)
-      .json({ success: true, message: "Product deleted successfully" });
-  } catch (error) {
-    handleError(res, error, "Error deleting product");
   }
 };
